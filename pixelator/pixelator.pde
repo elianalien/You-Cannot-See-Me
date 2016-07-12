@@ -1,14 +1,18 @@
+import gab.opencv.*;
 import processing.video.*;
+import java.awt.*;
 
 // Number of columns and rows in our system
 int cols, rows;
+
 // Variable to hold onto Capture object
 Capture video;
-PImage output;
+OpenCV opencv;
+
 
 // size
-int winHeight = 480;
 int winWidth  = 640;
+int winHeight = 480;
 
 float avg_r, avg_g, avg_b;
 
@@ -19,8 +23,6 @@ int[] filters = {1, 2, 4, 5, 8, 10, 20, 40, 80, 100, 120};
 void setup() {
   
   size(640,480);
-  surface.setResizable(true);
-  surface.setSize(winWidth, winHeight);
   
   noFill();
   noStroke();
@@ -29,58 +31,74 @@ void setup() {
   filter = filters[filter_index];
   
   video = new Capture(this,"name=FaceTime HD Camera (Built-in),size=640x480,fps=30");
+  opencv = new OpenCV(this, winWidth,winHeight);
+  opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
   video.start();
 }
 
 void draw() {
   
-  if (video.available()) {
-    
-    background( 255 );
-    
-      video.read();    
-      video.loadPixels();
+ if (video.available()) {
       
-        int minX = 120;
-        int minY = 120;
-        int maxX = 360;
-        int maxY = 360;
-        
-        int nonPixSize = minX *minY;
-        
-        for (int x = 0; x < width; x++){
-          for (int y = 0; y < height; y++){
-            int pixNum = y + x*width;
-            color c = video.get(x,y);
-            set(x,y,c);
-          }
+      background( 255 );
+      
+        video.read();    
+        video.loadPixels();
+        if (video.width > 0 && video.height > 0){
+          opencv.loadImage(video);
         }
         
-        for (int x = minX;  x < maxX; x+=filter) {
-          for (int y = minY; y < maxY; y+=filter ) {
-    
-            avg_r = avg_g = avg_b = 255.0;
-            
-            for (int r = x; r < x+filter; r++) {
-              for (int c = y; c < y+filter; c++ ) {
-                int loc = r + c*video.width;
-    
-                avg_r += red   (video.pixels[loc]);
-                avg_g += green (video.pixels[loc]);
-                avg_b += blue  (video.pixels[loc]);
-              }
-            }
-    
-            color col = color(avg_r/(filter*filter), 
-                              avg_g/(filter*filter), 
-                              avg_b/(filter*filter));
-            fill( col );
-            rect(x,y,filter,filter);
-          }
-        }
+          int minX = 120;
+          int minY = 120;
+          int maxX = 360;
+          int maxY = 360;
           
-      video.updatePixels();
-  }
+          int nonPixSize = minX *minY;
+          
+          for (int x = 0; x < width; x++){
+            for (int y = 0; y < height; y++){
+              int pixNum = y + x*width;
+              color c = video.get(x,y);
+              set(x,y,c);
+            }
+          }
+          
+          Rectangle[] faces = opencv.detect();
+          for (int i = 0; i < faces.length; i++){
+            println("X: " , faces[i].x);
+            println("Y: " , faces[i].y);
+            println("face width : ", faces[i].width);
+            println("face height: ", faces[i].height);
+            
+            for (int x = faces[i].x;  x < faces[i].x+faces[i].width; x+=filter) {
+              for (int y = faces[i].y; y < faces[i].y+faces[i].height; y+=filter ) {
+    
+                avg_r = avg_g = avg_b = 255.0;
+                
+                for (int r = x; r < x+filter; r++) {
+                  for (int c = y; c < y+filter; c++ ) {
+                    int loc = r + c*video.width;
+        
+                    avg_r += red   (video.pixels[loc]);
+                    avg_g += green (video.pixels[loc]);
+                    avg_b += blue  (video.pixels[loc]);
+                  }
+                }
+        
+                color col = color(avg_r/(filter*filter), 
+                                  avg_g/(filter*filter), 
+                                  avg_b/(filter*filter));
+                fill( col );
+                rect(x,y,filter,filter);
+              }
+            }  
+          } 
+          
+        video.updatePixels();
+        //image(video,0,0);
+    }
+
+  
 }
 
 void keyPressed() {
