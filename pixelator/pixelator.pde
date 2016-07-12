@@ -18,7 +18,7 @@ float avg_r, avg_g, avg_b;
 
 int filter=20;
 int filter_index = 6;
-int[] filters = {1, 2, 4, 5, 8, 10, 20, 40, 80, 100, 120};
+int[] filters = {1, 2, 4, 5, 8, 10, 20, 40};
 
 void setup() {
   
@@ -31,7 +31,6 @@ void setup() {
   filter = filters[filter_index];
   
   video = new Capture(this,"name=FaceTime HD Camera (Built-in),size=640x480,fps=30");
-  
   opencv = new OpenCV(this, winWidth,winHeight);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
   video.start();
@@ -45,6 +44,7 @@ void draw() {
         video.loadPixels();
         if (video.width > 0 && video.height > 0){
           opencv.loadImage(video);
+          //println("totalPix: ", video.width*video.height);
         }
         
           for (int x = 0; x < width; x++){
@@ -67,9 +67,14 @@ void draw() {
                     int loc = r + c*video.width;
                     //int loc = r + c*faces[i].width;
                     
-                    avg_r += red   (video.pixels[loc]);
-                    avg_g += green (video.pixels[loc]);
-                    avg_b += blue  (video.pixels[loc]);
+                    // keep the array inside bound
+                    // will probably get array out of bound if tracking two
+                    // people or more. keep loc lower than total pixel
+                    if (loc <= video.width*video.height){
+                      avg_r += red   (video.pixels[loc]);
+                      avg_g += green (video.pixels[loc]);
+                      avg_b += blue  (video.pixels[loc]);
+                    }                    
                   }
                 }
         
@@ -87,14 +92,19 @@ void draw() {
 }
 
 void keyPressed() {
+  
+  // up button, bigger pixelation
   if( keyCode == 38 ) {
     filter_index++;
+    
+  // down button, smaller pixelation
   } else if( keyCode == 40 ) {
     filter_index--;
   }
-  
+  // min filter
   if( filter_index < 0 ) {
     filter_index = 0;
+  // max filter
   } else if( filter_index > 7 ) {
     filter_index = 7;
   }
