@@ -7,7 +7,6 @@ int cols, rows;
 
 // Variable to hold onto Capture object
 Capture video;
-//PImage video;
 OpenCV opencv;
 
 
