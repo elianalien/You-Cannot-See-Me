@@ -9,11 +9,6 @@ int cols, rows;
 Capture video;
 OpenCV opencv;
 
-
-// size
-int winWidth  = 640;
-int winHeight = 480;
-
 float avg_r, avg_g, avg_b;
 
 int filter=20;
@@ -22,7 +17,7 @@ int[] filters = {1, 2, 4, 5, 8, 10, 20, 40};
 
 void setup() {
   
-  size(640,480);
+  size(640, 480);
   
   noFill();
   noStroke();
@@ -30,65 +25,65 @@ void setup() {
   
   filter = filters[filter_index];
   
-  video = new Capture(this,"name=FaceTime HD Camera (Built-in),size=640x480,fps=30");
-  opencv = new OpenCV(this, winWidth,winHeight);
+  video = new Capture(this,"name=FaceTime HD Camera (Built-in),size=640x480,fps=60");
+  opencv = new OpenCV(this, 640, 480);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
   video.start();
 }
 
 void draw() {
- if (video.available()) {
+  
+   if (video.available()) {
       background( 255 );
+    
+      video.read();    
+      video.loadPixels();
+      if (video.width > 0 && video.height > 0){
+        opencv.loadImage(video);
+        //println("totalPix: ", video.width*video.height);
+      }
       
-        video.read();    
-        video.loadPixels();
-        if (video.width > 0 && video.height > 0){
-          opencv.loadImage(video);
-          //println("totalPix: ", video.width*video.height);
+        for (int x = 0; x < width; x++){
+          for (int y = 0; y < height; y++){
+            color c = video.get(x,y);
+            set(x,y,c);
+          }
         }
         
-          for (int x = 0; x < width; x++){
-            for (int y = 0; y < height; y++){
-              color c = video.get(x,y);
-              set(x,y,c);
-            }
-          }
+        Rectangle[] faces = opencv.detect();
+        for (int i = 0; i < faces.length; i++){
           
-          Rectangle[] faces = opencv.detect();
-          for (int i = 0; i < faces.length; i++){
-            
-            for (int x = faces[i].x;  x < faces[i].x+faces[i].width; x+=filter) {
-              for (int y = faces[i].y; y < faces[i].y+faces[i].height; y+=filter ) {
+          for (int x = faces[i].x;  x < faces[i].x+faces[i].width; x+=filter) {
+            for (int y = faces[i].y; y < faces[i].y+faces[i].height; y+=filter ) {
     
-                avg_r = avg_g = avg_b = 255.0;
-                
-                for (int r = x; r < x+filter; r++) {
-                  for (int c = y; c < y+filter; c++ ) {
-                    int loc = r + c*video.width;
-                    //int loc = r + c*faces[i].width;
-                    
-                    // keep the array inside bound
-                    // will probably get array out of bound if tracking two
-                    // people or more. keep loc lower than total pixel
-                    if (loc <= video.width*video.height){
-                      avg_r += red   (video.pixels[loc]);
-                      avg_g += green (video.pixels[loc]);
-                      avg_b += blue  (video.pixels[loc]);
-                    }                    
-                  }
+              avg_r = avg_g = avg_b = 255.0;
+              
+              for (int r = x; r < x+filter; r++) {
+                for (int c = y; c < y+filter; c++ ) {
+                  int loc = r + c*video.width;
+                  
+                  // keep the array inside bound
+                  // will probably get array out of bound if tracking two
+                  // people or more. keep loc lower than total pixel
+                  if (loc <= video.width*video.height){
+                    avg_r += red   (video.pixels[loc]);
+                    avg_g += green (video.pixels[loc]);
+                    avg_b += blue  (video.pixels[loc]);
+                  }                    
                 }
-        
-                color col = color(avg_r/(filter*filter), 
-                                  avg_g/(filter*filter), 
-                                  avg_b/(filter*filter));
-                fill( col );
-                rect(x,y,filter,filter);
               }
-            }  
-          } 
-          
-        video.updatePixels();
- } 
+      
+              color col = color(avg_r/(filter*filter), 
+                                avg_g/(filter*filter), 
+                                avg_b/(filter*filter));
+              fill( col );
+              rect(x,y,filter,filter);
+            }
+          }  
+        } 
+        
+      video.updatePixels();
+   } 
 }
 
 void keyPressed() {
