@@ -7,6 +7,7 @@ int cols, rows;
 
 // Variable to hold onto Capture object
 Capture video;
+//PImage video;
 OpenCV opencv;
 
 
@@ -31,15 +32,14 @@ void setup() {
   filter = filters[filter_index];
   
   video = new Capture(this,"name=FaceTime HD Camera (Built-in),size=640x480,fps=30");
+  
   opencv = new OpenCV(this, winWidth,winHeight);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
   video.start();
 }
 
 void draw() {
-  
  if (video.available()) {
-      
       background( 255 );
       
         video.read();    
@@ -48,16 +48,8 @@ void draw() {
           opencv.loadImage(video);
         }
         
-          int minX = 120;
-          int minY = 120;
-          int maxX = 360;
-          int maxY = 360;
-          
-          int nonPixSize = minX *minY;
-          
           for (int x = 0; x < width; x++){
             for (int y = 0; y < height; y++){
-              int pixNum = y + x*width;
               color c = video.get(x,y);
               set(x,y,c);
             }
@@ -65,10 +57,6 @@ void draw() {
           
           Rectangle[] faces = opencv.detect();
           for (int i = 0; i < faces.length; i++){
-            println("X: " , faces[i].x);
-            println("Y: " , faces[i].y);
-            println("face width : ", faces[i].width);
-            println("face height: ", faces[i].height);
             
             for (int x = faces[i].x;  x < faces[i].x+faces[i].width; x+=filter) {
               for (int y = faces[i].y; y < faces[i].y+faces[i].height; y+=filter ) {
@@ -78,7 +66,8 @@ void draw() {
                 for (int r = x; r < x+filter; r++) {
                   for (int c = y; c < y+filter; c++ ) {
                     int loc = r + c*video.width;
-        
+                    //int loc = r + c*faces[i].width;
+                    
                     avg_r += red   (video.pixels[loc]);
                     avg_g += green (video.pixels[loc]);
                     avg_b += blue  (video.pixels[loc]);
@@ -95,10 +84,7 @@ void draw() {
           } 
           
         video.updatePixels();
-        //image(video,0,0);
-    }
-
-  
+ } 
 }
 
 void keyPressed() {
