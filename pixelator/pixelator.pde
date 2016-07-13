@@ -16,7 +16,7 @@ float avg_r, avg_g, avg_b;
 
 int filter=20;
 int filter_index = 6;
-int[] filters = {1, 2, 4, 5, 8, 10, 20, 40};
+int[] filters = {8, 10, 20, 24, 32, 40, 50, 60};
 
 // for OSC communication
 OscP5 oscP5;
@@ -32,7 +32,7 @@ void setup() {
 
   filter = filters[filter_index];
 
-  video = new Capture(this, "name=FaceTime HD Camera (Built-in),size=640x480,fps=60");
+  video = new Capture(this, "name=FaceTime HD Camera (Built-in),size=640x480,fps=30");
   opencv = new OpenCV(this, 640, 480);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
   video.start();
@@ -131,4 +131,5 @@ void keyPressed() {
   }
 
   filter = filters[filter_index];
+  println (filter);
 }
