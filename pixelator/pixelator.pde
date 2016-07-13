@@ -104,6 +104,7 @@ void oscEvent(OscMessage theOscMessage) {
     if (theOscMessage.checkTypetag("iifffii")) {
       /* parse theOscMessage and extract the values from the osc message arguments. */
       filter_index = theOscMessage.get(1).intValue();
+      filter = filters[filter_index];
       print("### received an osc message /test with typetag iiffffii.");
       println(" values: "+filter_index);
       return;
@@ -131,5 +132,5 @@ void keyPressed() {
   }
 
   filter = filters[filter_index];
-  println (filter);
+
 }
