@@ -24,7 +24,7 @@ void setup() {
   smooth();
   
   filter = filters[filter_index];
-  
+    
   video = new Capture(this,"name=FaceTime HD Camera (Built-in),size=640x480,fps=60");
   opencv = new OpenCV(this, 640, 480);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
