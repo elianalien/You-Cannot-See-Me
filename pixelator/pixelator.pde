@@ -16,7 +16,7 @@ float avg_r, avg_g, avg_b;
 
 int filter=20;
 int filter_index = 6;
-int[] filters = {8, 10, 20, 24, 32, 40, 50, 60};
+int[] filters = {10, 20, 24, 32, 40, 50, 60, 64};
 
 // for OSC communication
 OscP5 oscP5;
@@ -24,17 +24,22 @@ NetAddress myRemoteLocation;
 
 void setup() {
 
-  size(640, 480);
+  size(960, 540);
 
   noFill();
   noStroke();
   smooth();
 
   filter = filters[filter_index];
-    
-  video = new Capture(this,"name=FaceTime HD Camera (Built-in),size=640x480,fps=60");
 
-  opencv = new OpenCV(this, 640, 480);
+  String[] cameras = Capture.list();
+  for (int i = 0; i < cameras.length; i++) {
+    println(cameras[i]);
+  }
+
+  video = new Capture(this, cameras[3]);
+
+  opencv = new OpenCV(this, 960, 540);
   opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
   video.start();
 
@@ -47,7 +52,7 @@ void draw() {
   if (video.available()) {
     background( 255 );
 
-    video.read();    
+    video.read();
     video.loadPixels();
     if (video.width > 0 && video.height > 0) {
       opencv.loadImage(video);
@@ -60,7 +65,7 @@ void draw() {
         set(x, y, c);
       }
     }
-
+    
     Rectangle[] faces = opencv.detect();
     for (int i = 0; i < faces.length; i++) {
 
@@ -92,9 +97,11 @@ void draw() {
         }
       }
     } 
-
     video.updatePixels();
   }
+  fill(255);
+  textSize(52);
+  text("Silakan duduk dan bercerita", 120, 80);
 }
 
 void oscEvent(OscMessage theOscMessage) {
@@ -123,6 +130,8 @@ void keyPressed() {
     // down button, smaller pixelation
   } else if ( keyCode == 40 ) {
     filter_index--;
+  } else if (key == 's') {
+    saveFrame("output/frames####.png");
   }
   // min filter
   if ( filter_index < 0 ) {
@@ -133,5 +142,4 @@ void keyPressed() {
   }
 
   filter = filters[filter_index];
-
 }
