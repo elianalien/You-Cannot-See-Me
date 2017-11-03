@@ -15,6 +15,9 @@ Use openCV for Processing to detect face, and pixelate the face area.
 - Sending `TSPS/scene` message to localhost, port 12000, indicating detected number of people in the scene
 
 this installation showed at Bandung International Art Festival (Bidaf) 2016 
+
 link about this installation 
+
 video : https://www.youtube.com/watch?v=sHsZvr2NUXI
+
 articles : http://eliandaiva.com/works/you-cannot-see-me-bandung-international-digital-art-festival-2016/ 
